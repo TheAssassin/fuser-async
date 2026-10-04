@@ -267,4 +267,8 @@ impl<A: InodeAllocator + Send + Sync, F: Filesystem + Send + Sync> Filesystem
         attr.ino = ext_ino;
         Ok(attr)
     }
+    async fn readlink(&self, ino_ext: u64) -> Result<Vec<u8>, Self::Error> {
+        let ino = self.ext_to_int(ino_ext)?;
+        Ok(self.inner.readlink(ino).await?)
+    }
 }

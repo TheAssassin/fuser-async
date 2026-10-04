@@ -332,4 +332,7 @@ impl Filesystem for LocalFilesystem {
 
         self.insert_inode(path.into())
     }
+    async fn readlink(&self, _ino: u64) -> Result<Vec<u8>, Self::Error> {
+        Err(Error::Unimplemented)
+    }
 }

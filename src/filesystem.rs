@@ -75,6 +75,8 @@ pub trait Filesystem {
     ) -> Result<(fuser::FileAttr, u64), Self::Error>;
     /// Create a directory. See also [`fuser::Filesystem::mkdir`].
     async fn mkdir(&mut self, parent: u64, name: OsString) -> Result<fuser::FileAttr, Self::Error>;
+    /// Read the target of a symlink inode. See also [`fuser::Filesystem::readlink`].
+    async fn readlink(&self, _ino: u64) -> Result<Vec<u8>, Self::Error>;
     /// Get the set of inodes from the filesystem.
     ///
     /// Implementors can usually provide a more efficient implementation than the blanket one,
@@ -168,6 +170,10 @@ impl<T: Filesystem + Send + Sync + 'static> Filesystem for Arc<RwLock<T>> {
     async fn mkdir(&mut self, parent: u64, name: OsString) -> Result<fuser::FileAttr, Self::Error> {
         let mut x = self.as_ref().write().await;
         x.mkdir(parent, name).await
+    }
+    async fn readlink(&self, ino: u64) -> Result<Vec<u8>, Self::Error> {
+        let x = self.as_ref().read().await;
+        x.readlink(ino).await
     }
     async fn inodes(&self) -> Result<BTreeSet<u64>, Self::Error> {
         let x = self.as_ref().read().await;

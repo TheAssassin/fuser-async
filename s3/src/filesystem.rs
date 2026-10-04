@@ -171,4 +171,7 @@ impl<C: DataBlockCache> Filesystem for S3Filesystem<C> {
             .push(ino);
         Ok(utils::dir_attr(ino, 0, std::time::UNIX_EPOCH))
     }
+    async fn readlink(&self, _ino: u64) -> Result<Vec<u8>, Self::Error> {
+        Err(fuser_async::Error::Unimplemented.into())
+    }
 }

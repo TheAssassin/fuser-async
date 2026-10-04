@@ -69,6 +69,20 @@ where
             }
         });
     }
+    fn readlink(&mut self, _req: &fuser::Request<'_>, ino: u64, reply: fuser::ReplyData) {
+        debug!(ino, "Reading symlink target");
+        let inner = self.inner.clone();
+        self.handle.spawn(async move {
+            match inner.readlink(ino).await {
+                Ok(data) => reply.data(&data),
+                Err(e) => {
+                    error!(ino, "Error when reading symlink target: {}", e);
+                    let e: Error = e.into();
+                    reply.error((&e).into());
+                }
+            }
+        });
+    }
     fn open(&mut self, _req: &fuser::Request<'_>, ino: u64, flags: i32, reply: fuser::ReplyOpen) {
         debug!(ino, "Opening file handle for inode");
 
